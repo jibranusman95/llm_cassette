@@ -1,0 +1,79 @@
+module LlmCassette
+  VERSION: String
+
+  def self.configure: () { (Configuration) -> void } -> void
+  def self.configuration: () -> Configuration
+  def self.reset!: () -> nil
+  def self.current_cassette: () -> Cassette?
+  def self.use_cassette: (String name, ?record: Symbol?) { (Cassette) -> void } -> void
+
+  class Error < StandardError
+  end
+
+  class CassetteNotFoundError < Error
+  end
+
+  class NoMoreInteractionsError < Error
+  end
+
+  class Configuration
+    RECORD_MODES: Array[Symbol]
+
+    attr_accessor cassette_directory: String
+    attr_reader record: Symbol
+    attr_accessor replay_timing: bool
+
+    def initialize: () -> void
+    def record=: (Symbol | String mode) -> Symbol
+  end
+
+  class Interaction
+    attr_reader request: Hash[String, untyped]
+    attr_reader response: Hash[String, untyped]
+
+    def initialize: (request: Hash[String, untyped], response: Hash[String, untyped]) -> void
+    def self.from_recording: (env: untyped, response: untyped, streaming: bool, chunks: Array[Hash[Symbol, untyped]], request_body: String?) -> Interaction
+    def self.from_hash: (Hash[String, untyped] hash) -> Interaction
+    def to_h: () -> Hash[String, untyped]
+    def streaming?: () -> bool
+  end
+
+  class RequestSignature
+    attr_reader method: String
+    attr_reader uri: String
+    attr_reader body: String?
+
+    def initialize: (untyped env) -> void
+  end
+
+  class Cassette
+    attr_reader name: String
+
+    def initialize: (String name, ?record: Symbol?) -> void
+    def record?: () -> bool
+    def next_interaction: () -> Interaction
+    def record_interaction: (Interaction interaction) -> void
+    def eject!: () -> void
+    def size: () -> Integer
+  end
+
+  class Recorder
+    def initialize: (untyped env, untyped app, Cassette cassette) -> void
+    def call: () -> untyped
+  end
+
+  class Replayer
+    def initialize: (untyped env, Interaction interaction) -> void
+    def call: () -> untyped
+  end
+
+  class Middleware < Faraday::Middleware
+    def call: (untyped env) -> untyped
+  end
+
+  module RSpec
+    module Helpers
+      def use_llm_cassette: (?String? name, **untyped options) -> void
+    end
+  end
+end
