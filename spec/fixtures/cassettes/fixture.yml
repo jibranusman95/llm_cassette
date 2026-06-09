@@ -1,0 +1,18 @@
+---
+llm_cassette_version: "1"
+recorded_at: "2026-06-09T12:00:00Z"
+interactions:
+- request:
+    method: post
+    uri: https://api.openai.com/v1/chat/completions
+    body: "{}"
+  response:
+    status: 200
+    headers:
+      content-type: application/json
+    streaming: false
+    body: '{"choices":[{"message":{"content":"Hello"}}],"usage":{"prompt_tokens":5,"completion_tokens":1,"total_tokens":6}}'
+    usage:
+      prompt_tokens: 5
+      completion_tokens: 1
+      total_tokens: 6
